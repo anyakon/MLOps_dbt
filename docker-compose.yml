@@ -1,0 +1,24 @@
+name: hw4-dbt
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: hw4-clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_PASSWORD: hw4
+    volumes:
+      - ch-data:/var/lib/clickhouse
+      - ./clickhouse:/sql:ro
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+volumes:
+  ch-data:

@@ -1,0 +1,29 @@
+name: hw4_dbt
+version: "1.0.0"
+config-version: 2
+profile: hw4_dbt
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+dispatch:
+  - macro_namespace: dbt_date
+    search_order: ["hw4_dbt", "dbt_date"]
+
+models:
+  hw4_dbt:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+seeds:
+  hw4_dbt:
+    states:
+      +column_types:
+        state_code: String
+        state_name: String

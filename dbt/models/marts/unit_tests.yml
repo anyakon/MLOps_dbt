@@ -1,0 +1,26 @@
+unit_tests:
+  - name: test_fraud_rate_by_category
+    model: mart_fraud_by_category
+    given:
+      - input: ref('stg_transactions')
+        rows:
+          - {cat_id: grocery_pos, target: 1, amount: 100}
+          - {cat_id: grocery_pos, target: 0, amount: 50}
+          - {cat_id: travel, target: 0, amount: 20}
+    expect:
+      rows:
+        - {cat_id: grocery_pos, tx_count: 2, fraud_count: 1, fraud_rate: 50.0, amount_sum: 150, fraud_amount: 100}
+        - {cat_id: travel, tx_count: 1, fraud_count: 0, fraud_rate: 0.0, amount_sum: 20, fraud_amount: 0}
+
+  - name: test_merchant_suspicious_flag
+    model: mart_merchant_analytics
+    given:
+      - input: ref('stg_transactions')
+        rows:
+          - {merch: shop_a, amount: 100, target: 1}
+          - {merch: shop_a, amount: 100, target: 0}
+          - {merch: shop_b, amount: 10, target: 0}
+    expect:
+      rows:
+        - {merch: shop_a, tx_count: 2, fraud_count: 1, fraud_rate: 50.0, turnover: 200, is_suspicious: 1}
+        - {merch: shop_b, tx_count: 1, fraud_count: 0, fraud_rate: 0.0, turnover: 10, is_suspicious: 0}

@@ -1,0 +1,54 @@
+version: 2
+
+sources:
+  - name: transactions_db
+    schema: transactions_db
+    description: Сырые транзакции из домашки ClickHouse.
+    tables:
+      - name: transactions
+        description: Транзакции с признаком фрода.
+        columns:
+          - name: transaction_time
+            description: Время транзакции.
+            tests:
+              - not_null
+          - name: merch
+            description: Мерчант.
+          - name: cat_id
+            description: Категория транзакции.
+            tests:
+              - not_null
+          - name: amount
+            description: Сумма транзакции.
+            tests:
+              - not_null
+          - name: name_1
+            description: Имя клиента.
+          - name: name_2
+            description: Фамилия клиента.
+          - name: gender
+            description: Пол клиента.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["M", "F"]
+          - name: us_state
+            description: Штат США.
+            tests:
+              - not_null
+          - name: lat
+            description: Широта клиента.
+          - name: lon
+            description: Долгота клиента.
+          - name: merchant_lat
+            description: Широта мерчанта.
+          - name: merchant_lon
+            description: Долгота мерчанта.
+          - name: target
+            description: Признак фрода, 1 если мошенничество.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [0, 1]

@@ -1,0 +1,141 @@
+version: 2
+
+models:
+  - name: mart_daily_state_metrics
+    description: Дневные метрики транзакций по штатам.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [tx_date, us_state]
+    columns:
+      - name: tx_date
+        description: Дата.
+        tests: [not_null]
+      - name: us_state
+        description: Штат.
+        tests: [not_null]
+      - name: tx_count
+        description: Число транзакций.
+      - name: amount_sum
+        description: Сумма транзакций.
+      - name: avg_check
+        description: Средний чек.
+      - name: amount_p95
+        description: 95-й перцентиль суммы.
+      - name: large_tx_share
+        description: Доля крупных транзакций (large и xlarge), проценты.
+
+  - name: mart_fraud_by_category
+    description: Фрод по категориям.
+    columns:
+      - name: cat_id
+        description: Категория.
+        tests: [not_null, unique]
+      - name: tx_count
+        description: Число транзакций.
+      - name: fraud_count
+        description: Число фродовых транзакций.
+      - name: fraud_rate
+        description: Доля фрода, проценты.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: amount_sum
+        description: Сумма всех транзакций.
+      - name: fraud_amount
+        description: Сумма фродовых транзакций.
+
+  - name: mart_fraud_by_state
+    description: Фрод по штатам США.
+    columns:
+      - name: us_state
+        description: Код штата.
+        tests: [not_null, unique]
+      - name: state_name
+        description: Название штата из seed states.
+      - name: fraud_rate
+        description: Доля фрода, проценты.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: customer_count
+        description: Уникальные клиенты.
+      - name: merchant_count
+        description: Уникальные мерчанты.
+      - name: amount_sum
+        description: Сумма транзакций.
+      - name: fraud_amount
+        description: Сумма фрода.
+
+  - name: mart_customer_risk_profile
+    description: Профиль риска клиента по истории его транзакций.
+    columns:
+      - name: customer_id
+        description: Клиент.
+        tests: [not_null, unique]
+      - name: tx_count
+        description: Число транзакций клиента.
+      - name: fraud_rate
+        description: Доля фрода клиента, проценты.
+      - name: avg_check
+        description: Средний чек клиента.
+      - name: first_tx
+        description: Первая транзакция.
+      - name: last_tx
+        description: Последняя транзакция.
+      - name: risk_segment
+        description: HIGH при fraud_rate >= 5 или fraud_count >= 3, MEDIUM при любом фроде, иначе LOW.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["HIGH", "MEDIUM", "LOW"]
+
+  - name: mart_hourly_fraud_pattern
+    description: Фрод по дню недели и часу.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [day_of_week, tx_hour]
+    columns:
+      - name: day_of_week
+        description: День недели, 1 = понедельник.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7]
+      - name: tx_hour
+        description: Час транзакции.
+        tests: [not_null]
+      - name: fraud_rate
+        description: Доля фрода в этом окне, проценты.
+      - name: high_risk_window
+        description: 1, если fraud_rate выше общего fraud_rate.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+  - name: mart_merchant_analytics
+    description: Оборот, фрод и флаг подозрительности мерчанта.
+    columns:
+      - name: merch
+        description: Мерчант.
+        tests: [not_null, unique]
+      - name: turnover
+        description: Оборот мерчанта.
+      - name: fraud_rate
+        description: Доля фрода, проценты.
+      - name: is_suspicious
+        description: 1, если fraud_rate >= 1.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]

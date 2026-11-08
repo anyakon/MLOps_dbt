@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: Очищенные транзакции с типом суммы и ключом клиента.
+    columns:
+      - name: transaction_time
+        description: Время транзакции.
+        tests:
+          - not_null
+      - name: amount
+        description: Сумма транзакции.
+        tests:
+          - not_null
+      - name: cat_id
+        description: Категория.
+        tests:
+          - not_null
+      - name: us_state
+        description: Штат.
+        tests:
+          - not_null
+      - name: customer_id
+        description: Клиент, имя и фамилия.
+        tests:
+          - not_null
+      - name: target
+        description: Признак фрода.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: gender
+        description: Пол.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["M", "F"]
+      - name: amount_bucket
+        description: Сегмент суммы из макроса amount_bucket.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["small", "medium", "large", "xlarge"]
+      - name: tx_date
+        description: Дата транзакции.
+        tests:
+          - not_null

@@ -1,0 +1,13 @@
+hw4_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      host: localhost
+      port: 8123
+      user: default
+      password: hw4
+      schema: transactions_db
+      secure: false
+      verify: false
+      threads: 2
